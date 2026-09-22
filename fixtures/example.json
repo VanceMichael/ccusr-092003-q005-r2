@@ -1,6 +1,105 @@
 {
-  "race_ref": "RACE-DEMO",
-  "course_revision": 1,
-  "fleet_ref": "TEAM-A",
-  "rescue_zone": "ZONE-1"
+  "description": "松花江帆船赛两天赛程的本地演示请求序列（不含真实身份）。可用 python -m scripts.seed 回放到本地服务。",
+  "requests": [
+    {"method": "PUT", "path": "/races", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "title": "松花江帆船赛演示赛"}},
+
+    {"method": "PUT", "path": "/legs", "role": "judge", "body": {
+      "leg_ref": "LEG-WW", "race_ref": "RACE-DEMO", "track_ref": "WW-1",
+      "title": "绕标赛", "seq": 1, "required_zones": ["ZONE-1"],
+      "wind_min_kn": 3.0, "wind_max_kn": 20.0,
+      "visibility_min_m": 1000.0, "obs_max_age_s": 1800}},
+    {"method": "PUT", "path": "/legs", "role": "judge", "body": {
+      "leg_ref": "LEG-LD", "race_ref": "RACE-DEMO", "track_ref": "LD-2",
+      "title": "长航赛", "seq": 2, "required_zones": ["ZONE-2", "ZONE-3"],
+      "wind_min_kn": 3.0, "wind_max_kn": 18.0,
+      "visibility_min_m": 1500.0, "obs_max_age_s": 1800}},
+
+    {"method": "PUT", "path": "/entries", "role": "judge", "body": {
+      "entry_ref": "TEAM-A", "race_ref": "RACE-DEMO", "boat_ref": "BOAT-A1"}},
+    {"method": "PUT", "path": "/entries", "role": "judge", "body": {
+      "entry_ref": "TEAM-B", "race_ref": "RACE-DEMO", "boat_ref": "BOAT-B2"}},
+
+    {"method": "POST", "path": "/events/course-revision", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T08:40:00+08:00",
+      "revision": 3, "track_ref": "WW-1", "confirmed": true,
+      "buoys_sha256": "0000000000000000000000000000000000000000000000000000000000000000"}},
+    {"method": "POST", "path": "/events/observation", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T08:40:00+08:00",
+      "kind": "wind", "value": 10.0, "observation_ref": "OBS-WW-W-0840"}},
+    {"method": "POST", "path": "/events/observation", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T08:40:00+08:00",
+      "kind": "visibility", "value": 3000.0, "observation_ref": "OBS-WW-V-0840"}},
+    {"method": "POST", "path": "/events/rescue-coverage", "role": "rescue", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T08:40:00+08:00",
+      "zone": "ZONE-1", "active": true, "unit_ref": "UNIT-Z1"}},
+    {"method": "POST", "path": "/events/checkin", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW", "fleet_ref": "TEAM-A",
+      "occurred_at": "2026-09-20T08:20:00+08:00"}},
+    {"method": "POST", "path": "/events/checkin", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW", "fleet_ref": "TEAM-B",
+      "occurred_at": "2026-09-20T08:25:00+08:00"}},
+    {"method": "POST", "path": "/events/boat-check", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "fleet_ref": "TEAM-A",
+      "occurred_at": "2026-09-19T16:00:00+08:00",
+      "status": "passed", "inspection_ref": "INSP-A-1"}},
+    {"method": "POST", "path": "/events/boat-check", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "fleet_ref": "TEAM-B",
+      "occurred_at": "2026-09-19T16:10:00+08:00",
+      "status": "passed", "inspection_ref": "INSP-B-1"}},
+    {"method": "POST", "path": "/events/training", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "fleet_ref": "TEAM-A",
+      "occurred_at": "2026-09-19T15:00:00+08:00",
+      "status": "completed", "course_ref": "TR-2026"}},
+    {"method": "POST", "path": "/events/training", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "fleet_ref": "TEAM-B",
+      "occurred_at": "2026-09-19T15:00:00+08:00",
+      "status": "completed", "course_ref": "TR-2026"}},
+
+    {"method": "POST", "path": "/legs/LEG-WW/start", "role": "judge", "body": {
+      "occurred_at": "2026-09-20T09:00:00+08:00"}},
+
+    {"method": "POST", "path": "/events/checkpoint", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW", "fleet_ref": "TEAM-B",
+      "occurred_at": "2026-09-20T09:20:00+08:00",
+      "checkpoint_ref": "CP-B-1"}},
+
+    {"method": "POST", "path": "/events/course-revision", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T09:30:00+08:00",
+      "revision": 4, "track_ref": "WW-1", "confirmed": false,
+      "note_ref": "BUOY-DRIFT-7"}},
+    {"method": "POST", "path": "/events/suspend", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T09:31:00+08:00",
+      "reason": "浮标移位，赛道待复核"}},
+
+    {"method": "POST", "path": "/events/course-revision", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T09:50:00+08:00",
+      "revision": 5, "track_ref": "WW-1", "confirmed": true}},
+    {"method": "POST", "path": "/events/observation", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T09:55:00+08:00",
+      "kind": "wind", "value": 9.0, "observation_ref": "OBS-WW-W-0955"}},
+    {"method": "POST", "path": "/events/observation", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW",
+      "occurred_at": "2026-09-20T09:55:00+08:00",
+      "kind": "visibility", "value": 4000.0, "observation_ref": "OBS-WW-V-0955"}},
+    {"method": "POST", "path": "/legs/LEG-WW/resume", "role": "judge", "body": {
+      "occurred_at": "2026-09-20T10:00:00+08:00"}},
+
+    {"method": "POST", "path": "/events/withdrawal", "role": "judge", "body": {
+      "race_ref": "RACE-DEMO", "leg_ref": "LEG-WW", "fleet_ref": "TEAM-B",
+      "occurred_at": "2026-09-20T10:20:00+08:00",
+      "reason": "桅杆受损"}},
+
+    {"method": "POST", "path": "/legs/LEG-WW/sign", "role": "judge", "body": {
+      "occurred_at": "2026-09-20T11:00:00+08:00",
+      "result_ref": "RESULT-WW-1"}}
+  ]
 }

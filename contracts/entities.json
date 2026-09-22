@@ -1,19 +1,82 @@
 {
-  "schema_version": "1",
+  "schema_version": "2",
   "domain": "松花江帆船赛安全判定",
-  "required_fields": [
-    "race_ref",
-    "course_revision",
-    "fleet_ref",
-    "observation_ref",
-    "rescue_zone",
-    "occurred_at"
+  "time_format": "ISO 8601 with offset（必填，如 2026-09-20T09:00:00+08:00）",
+  "roles": {
+    "judge": "裁判：赛事/赛段/船队登记，报到、检修、培训、赛道版本、观测、暂停/恢复、发令、检查点、退赛、签署结果",
+    "rescue": "救援：仅维护救援覆盖与安全事件",
+    "public": "公众（默认，无需头）：只读当前权威决定"
+  },
+  "role_header": "X-Role: judge | rescue | public",
+  "common_fields": {
+    "race_ref": "赛事引用编号",
+    "leg_ref": "赛段引用编号",
+    "fleet_ref": "船队引用编号（= entry_ref）",
+    "boat_ref": "船只受控编号",
+    "track_ref": "江段引用编号（绕标赛与长航赛不同）",
+    "occurred_at": "事实实际发生时间（业务时间，带偏移量）",
+    "recorded_at": "服务端受理时间（系统填写）"
+  },
+  "leg_config_fields": {
+    "required_zones": "本赛段江段要求全部就位的救援区编号数组",
+    "wind_min_kn": "风速下限（节），可空",
+    "wind_max_kn": "风速上限（节），可空",
+    "visibility_min_m": "能见度下限（米），可空",
+    "obs_max_age_s": "发令瞬间观测可接受的最大时效（秒），默认 1800"
+  },
+  "event_types": {
+    "checkin": {"role": "judge", "scoped_to": "leg", "required": ["fleet_ref"]},
+    "boat-check": {"role": "judge", "scoped_to": "race", "required": ["fleet_ref", "status"],
+                   "status_values": ["passed", "failed"]},
+    "training": {"role": "judge", "scoped_to": "race", "required": ["fleet_ref", "status"],
+                 "status_values": ["completed", "incomplete"]},
+    "course-revision": {"role": "judge", "scoped_to": "leg",
+                        "required": ["revision", "track_ref", "confirmed"],
+                        "note": "浮标移位等变更以新版本表达；confirmed=true 且 track_ref 与赛段一致才满足发令门"},
+    "observation": {"role": "judge", "scoped_to": "leg",
+                    "required": ["kind", "value", "observation_ref"],
+                    "kind_values": ["wind", "visibility"],
+                    "note": "原始材料只保存 observation_ref；发令瞬间只采信 obs_max_age_s 内的最新一条"},
+    "rescue-coverage": {"role": "rescue", "scoped_to": "leg",
+                        "required": ["zone", "active"],
+                        "note": "按本赛段 required_zones 逐区判定；旧江段的区不满足新江段"},
+    "safety-incident": {"role": "rescue", "scoped_to": "race",
+                        "required": ["incident_ref", "summary_sha256", "severity"],
+                        "note": "原始材料只保存 sha256 摘要，不影响发令门"},
+    "suspend": {"role": "judge", "scoped_to": "leg", "required": ["reason"],
+                "note": "仅开放后的赛段可暂停"},
+    "checkpoint": {"role": "judge", "scoped_to": "leg",
+                   "required": ["fleet_ref", "checkpoint_ref"]},
+    "withdrawal": {"role": "judge", "scoped_to": "leg", "required": ["fleet_ref", "reason"],
+                   "note": "退赛后此前检查点全部保留，船队不再参与发令门"}
+  },
+  "transitions": {
+    "POST /legs/{leg_ref}/start": "裁判首次发令：以 occurred_at 为 T 点时间评估全部前置条件，满足才开放并留存依据快照",
+    "POST /legs/{leg_ref}/resume": "裁判暂停后恢复：在 T 重新确认全部前置条件，满足才清除暂停",
+    "POST /legs/{leg_ref}/sign": "裁判签署结果：赛段冻结，occurred_at 晚于签署时间的事实一律拒收"
+  },
+  "decision_status": ["not_ready", "ready_to_start", "open", "suspended", "finished"],
+  "read_models": {
+    "GET /legs/{leg_ref}/decision": "公众当前权威决定：status、ready、reasons、basis（含版本/观测编号/发生与受理时间）、updated_at、progress",
+    "GET /races/{race_ref}/decision": "赛事下全部赛段的当前决定",
+    "GET /legs/{leg_ref}/attempts": "裁判查历次发令/恢复判定快照（含被拒绝的尝试）",
+    "GET /races/{race_ref}/safety-events": "裁判与救援查安全事件与救援覆盖"
+  },
+  "invariants": [
+    "事件 append-only：不删除、不就地改写，更正以新事件表达",
+    "能否开放只取决于发令瞬间 T 的前置条件；受理再晚的迟到事实不改变 T 的判定快照",
+    "暂停后恢复必须重新确认全部前置条件",
+    "赛段签署后冻结，发生时间晚于签署的事实拒收；发生时间更早的补录保留但不改写冻结结果",
+    "退赛保留此前全部检查点，退赛船队退出后续发令门",
+    "救援只维护安全域，裁判签署结果，公众只读带依据与更新时间的当前决定"
   ],
-  "time_format": "ISO 8601 with offset",
   "sample": {
     "race_ref": "RACE-DEMO",
+    "leg_ref": "LEG-WW",
+    "track_ref": "WW-1",
     "course_revision": 1,
     "fleet_ref": "TEAM-A",
-    "rescue_zone": "ZONE-1"
+    "rescue_zone": "ZONE-1",
+    "occurred_at": "2026-09-20T09:00:00+08:00"
   }
 }
