@@ -1,6 +1,110 @@
 {
+  "description": "松花江帆船赛安全判定示例事件序列（不含真实身份）：绕标赛日浮标移位暂停→重新确认→发令→迟到观测留痕。所有时间为带偏移量 ISO 8601。",
   "race_ref": "RACE-DEMO",
-  "course_revision": 1,
-  "fleet_ref": "TEAM-A",
-  "rescue_zone": "ZONE-1"
+  "leg_ref": "LEG-BUOY-DEMO-1",
+  "events": [
+    {
+      "event_id": "EV-COURSE-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "event_type": "course_published",
+      "actor_role": "race_office",
+      "actor_ref": "OFFICE-1",
+      "occurred_at": "2026-09-22T07:00:00+08:00",
+      "payload": {"course_revision": 1, "buoy_refs": ["BUOY-Z1"], "rescue_zones": ["ZONE-1"]}
+    },
+    {
+      "event_id": "EV-WIND-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "event_type": "weather_wind",
+      "actor_role": "weather_observer",
+      "actor_ref": "WX-1",
+      "occurred_at": "2026-09-22T07:00:00+08:00",
+      "payload": {"wind_speed_kt": 8, "limit_kt": 15}
+    },
+    {
+      "event_id": "EV-VIS-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "event_type": "weather_visibility",
+      "actor_role": "weather_observer",
+      "actor_ref": "WX-1",
+      "occurred_at": "2026-09-22T07:00:00+08:00",
+      "payload": {"visibility_m": 3000, "minimum_m": 1000}
+    },
+    {
+      "event_id": "EV-COV-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "event_type": "rescue_coverage",
+      "actor_role": "rescue_coordinator",
+      "actor_ref": "RC-1",
+      "occurred_at": "2026-09-22T07:00:00+08:00",
+      "payload": {"rescue_zone": "ZONE-1", "course_revision": 1, "covered": true}
+    },
+    {
+      "event_id": "EV-CI-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "fleet_ref": "TEAM-A",
+      "event_type": "fleet_checkin",
+      "actor_role": "registrar",
+      "actor_ref": "REG-1",
+      "occurred_at": "2026-09-22T07:30:00+08:00",
+      "payload": {}
+    },
+    {
+      "event_id": "EV-BI-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "fleet_ref": "TEAM-A",
+      "event_type": "boat_inspection",
+      "actor_role": "inspector",
+      "actor_ref": "INSP-1",
+      "occurred_at": "2026-09-22T07:40:00+08:00",
+      "payload": {"passed": true}
+    },
+    {
+      "event_id": "EV-TR-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "fleet_ref": "TEAM-A",
+      "event_type": "training_completed",
+      "actor_role": "trainer",
+      "actor_ref": "TR-1",
+      "occurred_at": "2026-09-22T07:50:00+08:00",
+      "payload": {}
+    },
+    {
+      "event_id": "EV-SUS-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "event_type": "leg_suspended",
+      "actor_role": "race_referee",
+      "actor_ref": "REF-1",
+      "occurred_at": "2026-09-22T08:30:00+08:00",
+      "payload": {"reason": "浮标 BUOY-Z1 移位"}
+    },
+    {
+      "event_id": "EV-RES-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "event_type": "leg_resumed",
+      "actor_role": "race_referee",
+      "actor_ref": "REF-1",
+      "occurred_at": "2026-09-22T08:55:00+08:00",
+      "payload": {"reconfirmed": true}
+    },
+    {
+      "event_id": "EV-CMD-1",
+      "race_ref": "RACE-DEMO",
+      "leg_ref": "LEG-BUOY-DEMO-1",
+      "event_type": "start_commanded",
+      "actor_role": "race_referee",
+      "actor_ref": "REF-1",
+      "occurred_at": "2026-09-22T09:00:00+08:00",
+      "payload": {}
+    }
+  ]
 }

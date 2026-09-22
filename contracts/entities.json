@@ -1,18 +1,57 @@
 {
-  "schema_version": "1",
+  "schema_version": "2",
   "domain": "松花江帆船赛安全判定",
-  "required_fields": [
-    "race_ref",
-    "course_revision",
-    "fleet_ref",
-    "observation_ref",
-    "rescue_zone",
-    "occurred_at"
-  ],
   "time_format": "ISO 8601 with offset",
+  "identity": "外部主体一律使用不含真实身份信息的引用编号；原始材料只保存受控引用 source_ref 或 sha256 摘要",
+  "roles": {
+    "race_referee": "总裁判/裁判台：暂停、恢复、发令、签署比赛结果",
+    "registrar": "船队报到登记",
+    "inspector": "船只检修",
+    "trainer": "培训确认",
+    "race_office": "赛道版本（浮标配布）发布",
+    "weather_observer": "风速、能见度观测",
+    "rescue_coordinator": "救援覆盖维护与安全事件",
+    "public": "只读：查询当前决定（不鉴权）"
+  },
+  "event_envelope": ["event_id", "race_ref", "leg_ref", "fleet_ref", "event_type", "actor_role", "actor_ref", "occurred_at", "source_ref", "payload"],
+  "event_types": {
+    "fleet_checkin": {"role": "registrar", "payload": ["fleet_ref"], "note": "船队报到，按报到时刻生效"},
+    "boat_inspection": {"role": "inspector", "payload": ["fleet_ref", "passed"], "note": "passed=true 检修合格；false 为不合格记录，不得开放"},
+    "training_completed": {"role": "trainer", "payload": ["fleet_ref"], "note": "安全培训完成"},
+    "withdrawal": {"role": "registrar", "payload": ["fleet_ref"], "note": "船队退赛；此前检查点记录永久保留"},
+    "course_published": {"role": "race_office", "payload": ["course_revision", "buoy_refs"], "note": "赛道版本发布，按实际发布时间生效"},
+    "weather_wind": {"role": "weather_observer", "payload": ["wind_speed_kt", "limit_kt"], "note": "风速观测；wind_speed_kt>limit_kt 为超限"},
+    "weather_visibility": {"role": "weather_observer", "payload": ["visibility_m", "minimum_m"], "note": "能见度观测；visibility_m<minimum_m 为不足"},
+    "rescue_coverage": {"role": "rescue_coordinator", "payload": ["rescue_zone", "course_revision", "covered"], "note": "按赛道版本+江段声明救援覆盖；旧版本覆盖不适用新版本赛道"},
+    "safety_incident": {"role": "rescue_coordinator", "payload": ["rescue_zone", "severity", "active"], "note": "安全事件；active=true 的活跃事件阻断发令"},
+    "leg_suspended": {"role": "race_referee", "payload": ["reason"], "note": "裁判台暂停赛段"},
+    "leg_resumed": {"role": "race_referee", "payload": ["reconfirmed"], "note": "恢复必须重新确认全部前置条件，reconfirmed=true"},
+    "checkpoint_recorded": {"role": "race_referee", "payload": ["fleet_ref", "checkpoint_ref", "rank_hint"], "note": "航次检查点，退赛后仍保留"},
+    "start_commanded": {"role": "race_referee", "payload": {}, "note": "发令：仅在发令瞬间全部前置条件有效才开放；决定被冻结"},
+    "result_signed": {"role": "race_referee", "payload": ["result_ref"], "note": "裁判签署比赛结果，赛段终局"}
+  },
+  "preconditions": [
+    "course_current",
+    "wind_within_limit",
+    "visibility_adequate",
+    "rescue_covered",
+    "no_active_safety_incident",
+    "not_suspended",
+    "fleet_ready"
+  ],
+  "fleet_ready_requires": ["fleet_checkin", "boat_inspection.passed", "training_completed", "not_withdrawn"],
+  "decision_principles": [
+    "事件只追加，occurred_at 为业务实际发生时间，迟到观测按 occurred_at 归位但永不改写已冻结的发令决定",
+    "某赛段只有在发令瞬间全部前置条件有效才可开放",
+    "暂停后的恢复必须重新确认（reconfirmed），确认时刻重新评估全部前置条件",
+    "退赛保留此前检查点；退赛船队不阻塞赛段开放但不列入发令名单",
+    "裁判签署比赛结果；救援人员只维护安全事件，不能发令/暂停/签署",
+    "公开查询返回当前决定、依据版本(basis)与更新时间(updated_at)"
+  ],
   "sample": {
     "race_ref": "RACE-DEMO",
-    "course_revision": 1,
+    "leg_ref": "LEG-BUOY-1",
+    "course_revision": 2,
     "fleet_ref": "TEAM-A",
     "rescue_zone": "ZONE-1"
   }
